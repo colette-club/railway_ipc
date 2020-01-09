@@ -1,4 +1,6 @@
 defmodule RailwayIpc.EventsConsumer do
+  @moduledoc false
+
   defmacro __using__(opts) do
     quote do
       require Logger
@@ -9,6 +11,8 @@ defmodule RailwayIpc.EventsConsumer do
                         :stream_adapter,
                         RailwayIpc.RabbitMQ.RabbitMQAdapter
                       )
+
+      @behaviour RailwayIpc.ConsumerBehaviour
 
       alias RailwayIpc.Connection, as: Connection
       alias RailwayIpc.Core.EventsConsumer
@@ -27,7 +31,7 @@ defmodule RailwayIpc.EventsConsumer do
 
       def handle_info(
             {:basic_deliver, payload, %{delivery_tag: delivery_tag}},
-            state = %{channel: channel}
+            %{channel: channel} = state
           ) do
         ack_function = fn ->
           @stream_adapter.ack(channel, delivery_tag)
