@@ -15,7 +15,7 @@ defmodule RailwayIpc.Consumer.SupervisorTest do
     end
 
     test "returns the otp_app and the Consumer adapter" do
-      assert {:railway_ipc, RailwayIpc.TestConsumer} = ConsumerSupervisor.compile_time_config([broker: RailwayIpc.TestBroker])
+      assert {:railway_ipc, RailwayIpc.TestConsumerAdapter} = ConsumerSupervisor.compile_time_config([broker: RailwayIpc.TestBroker])
     end
   end
 
@@ -25,9 +25,9 @@ defmodule RailwayIpc.Consumer.SupervisorTest do
       opts = [parent: parent]
       use_opts = [broker: RailwayIpc.TestBroker, queue_name: "default:messages"]
 
-      assert {:ok, pid} = ConsumerSupervisor.start_link(RailwayIpc.TestRabbitMQConsumer, :my_app, RailwayIpc.TestConsumer, use_opts, opts)
-      assert_received {RailwayIpc.TestConsumer, :child_spec, opts}
-      assert [broker: RailwayIpc.TestBroker, module: RailwayIpc.TestRabbitMQConsumer, name: RailwayIpc.TestRabbitMQConsumer, otp_app: :my_app, parent: ^parent, queue_name: "default:messages"] = normalize(opts)
+      assert {:ok, pid} = ConsumerSupervisor.start_link(RailwayIpc.TestConsumer, :my_app, RailwayIpc.TestConsumerAdapter, use_opts, opts)
+      assert_received {RailwayIpc.TestConsumerAdapter, :child_spec, opts}
+      assert [broker: RailwayIpc.TestBroker, module: RailwayIpc.TestConsumer, name: RailwayIpc.TestConsumer, otp_app: :my_app, parent: ^parent, queue_name: "default:messages"] = normalize(opts)
 
       :ok = Supervisor.stop(pid)
     end

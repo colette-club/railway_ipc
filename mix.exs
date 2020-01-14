@@ -4,7 +4,7 @@ defmodule RailwayIpc.MixProject do
   def project do
     [
       app: :railway_ipc,
-      version: "0.1.5",
+      version: "0.2.0",
       elixir: "~> 1.8",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
@@ -14,14 +14,12 @@ defmodule RailwayIpc.MixProject do
     ]
   end
 
-  # Run "mix help compile.app" to learn about applications.
   def application do
     [
-      extra_applications: [:logger]
+      extra_applications: [:lager, :logger]
     ]
   end
 
-  # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:amqp, "~> 1.4"},
@@ -51,7 +49,7 @@ defmodule RailwayIpc.MixProject do
       description: "Elixir IPC",
       files: ~w(lib .formatter.exs mix.exs README* LICENSE* CHANGELOG*),
       licenses: ["MIT"],
-      links: %{"GitHub" => "https://github.com/learn-co/railway_ipc"}
+      links: %{"GitHub" => "https://github.com/djeusette/railway_ipc"}
     ]
   end
 end

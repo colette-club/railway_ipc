@@ -26,11 +26,11 @@ defmodule RailwayIpc.ConsumerTest do
                Consumer.process(
                  encoded_message,
                  metadata,
-                 RailwayIpc.TestRabbitMQConsumer,
+                 RailwayIpc.TestConsumer,
                  ack_func
                )
 
-      assert_received {RailwayIpc.TestRabbitMQConsumer, :handle_message, ^message, ^metadata}
+      assert_received {RailwayIpc.TestConsumer, :handle_message, ^message, ^metadata}
       assert_received {:ack_func, ^correlation_id}
     end
 
@@ -55,11 +55,11 @@ defmodule RailwayIpc.ConsumerTest do
                Consumer.process(
                  encoded_message,
                  metadata,
-                 RailwayIpc.TestRabbitMQConsumer,
+                 RailwayIpc.TestConsumer,
                  ack_func
                )
 
-      assert_received {RailwayIpc.TestRabbitMQConsumer, :handle_message, ^message, ^metadata}
+      assert_received {RailwayIpc.TestConsumer, :handle_message, ^message, ^metadata}
       refute_received {:ack_func, ^correlation_id}
     end
   end

@@ -1,4 +1,4 @@
-defmodule RailwayIpc.TestConsumer do
+defmodule RailwayIpc.TestConsumerAdapter do
   @moduledoc false
 
   @behaviour RailwayIpc.Consumer.Impl
@@ -41,7 +41,7 @@ defmodule RailwayIpc.TestAdapter do
 
   def validate_config!(_config), do: :ok
 
-  def consumer_adapter, do: RailwayIpc.TestConsumer
+  def consumer_adapter, do: RailwayIpc.TestConsumerAdapter
 
   def publish(payload, metadata, opts \\ []) do
     opts[:parent] && send(opts[:parent], {__MODULE__, :publish, payload, metadata, opts})

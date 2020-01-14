@@ -1,7 +1,4 @@
-Application.load(:railway_ipc)
+{:ok, _} = Application.ensure_all_started(:amqp)
 
-for app <- Application.spec(:railway_ipc, :applications) do
-  Application.ensure_all_started(app)
-end
-
+ExUnit.configure(exclude: [:pending, :rabbitmq])
 ExUnit.start()

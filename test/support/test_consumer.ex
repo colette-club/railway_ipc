@@ -1,4 +1,4 @@
-defmodule RailwayIpc.TestRabbitMQConsumer do
+defmodule RailwayIpc.TestConsumer do
   @moduledoc false
   use RailwayIpc.Consumer, broker: RailwayIpc.TestBroker, queue_name: "default:messages"
 

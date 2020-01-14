@@ -9,9 +9,9 @@ defmodule RailwayIpc.PayloadTest do
 
   describe "encode/1" do
     test "properly encodes a protobuf payload" do
-      command = Commands.DoAThing.new(uuid: "123123")
+      command = Events.AThingWasDone.new(uuid: "123123")
       {:ok, encoded} = Payload.encode(command)
-      assert encoded == "{\"encoded_message\":\"GgYxMjMxMjM=\",\"type\":\"Commands::DoAThing\"}"
+      assert encoded == "{\"encoded_message\":\"GgYxMjMxMjM=\",\"type\":\"Events::AThingWasDone\"}"
     end
 
     test "raises an ArgumentError with a map payload" do
@@ -41,19 +41,19 @@ defmodule RailwayIpc.PayloadTest do
 
   describe "decode/1" do
     test "properly decodes message" do
-      command = Commands.DoAThing.new(uuid: "123123")
+      command = Events.AThingWasDone.new(uuid: "123123")
       {:ok, encoded} = Payload.encode(command)
       {:ok, decoded} = Payload.decode(encoded)
 
-      assert decoded.__struct__ == Commands.DoAThing
+      assert decoded.__struct__ == Events.AThingWasDone
       assert decoded.uuid == "123123"
     end
 
     test "properly decodes message with whitespace" do
-      encoded = "{\"encoded_message\":\"GgYxMjMxMjM=\",\"type\":\"Commands::DoAThing\"}\n"
+      encoded = "{\"encoded_message\":\"GgYxMjMxMjM=\",\"type\":\"Events::AThingWasDone\"}\n"
       {:ok, decoded} = Payload.decode(encoded)
 
-      assert decoded.__struct__ == Commands.DoAThing
+      assert decoded.__struct__ == Events.AThingWasDone
     end
 
     test "when module does not have a :decode function" do
@@ -97,7 +97,7 @@ defmodule RailwayIpc.PayloadTest do
 
   describe "prepare/1" do
     test "adds UUID and correlation_id when missing" do
-      command = Commands.DoAThing.new()
+      command = Events.AThingWasDone.new()
       assert "" = Map.get(command, :uuid)
       assert "" = Map.get(command, :correlation_id)
 
@@ -112,7 +112,7 @@ defmodule RailwayIpc.PayloadTest do
     end
 
     test "does not replace UUID or correlation_id if present" do
-      command = Commands.DoAThing.new(uuid: "my uuid", correlation_id: "my correlation_id")
+      command = Events.AThingWasDone.new(uuid: "my uuid", correlation_id: "my correlation_id")
       assert "my uuid" = Map.get(command, :uuid)
       assert "my correlation_id" = Map.get(command, :correlation_id)
 
@@ -125,7 +125,7 @@ defmodule RailwayIpc.PayloadTest do
 
   describe "metadata/1" do
     test "returns a map containing uuid and correlation_id from the message" do
-      command = Commands.DoAThing.new(uuid: "my uuid", correlation_id: "my correlation_id")
+      command = Events.AThingWasDone.new(uuid: "my uuid", correlation_id: "my correlation_id")
       assert %{uuid: "my uuid", correlation_id: "my correlation_id"} = Payload.metadata(command)
     end
   end
