@@ -1,6 +1,13 @@
 # RailwayIpc
 
-**TODO: Add description**
+## Google Protobufs
+
+For the tests to run, you need to create Google protobufs.
+To do so, run `mix generate_test_protobufs`.
+
+## Usage
+
+TODO
 
 ## Installation
 
@@ -10,7 +17,7 @@ by adding `railway_ipc` to your list of dependencies in `mix.exs`:
 ```elixir
 def deps do
   [
-    {:railway_ipc, "~> 0.1.0"}
+    {:railway_ipc, "~> 0.2.0"}
   ]
 end
 ```
