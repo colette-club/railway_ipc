@@ -14,23 +14,23 @@ defmodule RailwayIpc.UtilsTest do
     end
   end
 
-  describe "module_has_function?/2" do
+  describe "module_defines_function?/2" do
     test "returns true if module has function" do
-      assert Utils.module_has_function?(Utils, :module_defined?)
+      assert Utils.module_defines_function?(Utils, :module_defined?)
     end
 
     test "returns false if module does not have function" do
-      refute Utils.module_has_function?(Utils, :unknown_function!)
+      refute Utils.module_defines_function?(Utils, :unknown_function!)
     end
   end
 
-  describe "module_has_functions?/2" do
+  describe "module_defines_functions?/2" do
     test "returns true if module has all functions" do
-      assert Utils.module_has_functions?(Utils, [:module_defined?, :module_has_function?])
+      assert Utils.module_defines_functions?(Utils, [:module_defined?, :module_defines_function?])
     end
 
     test "returns false if module is missing any function" do
-      refute Utils.module_has_functions?(Utils, [:module_defined?, :unknown_function!])
+      refute Utils.module_defines_functions?(Utils, [:module_defined?, :unknown_function!])
     end
   end
 end

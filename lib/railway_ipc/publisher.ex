@@ -1,80 +1,48 @@
 defmodule RailwayIpc.Publisher do
-  @stream_adapter Application.get_env(
-                    :railway_ipc,
-                    :stream_adapter,
-                    RailwayIpc.RabbitMQ.RabbitMQAdapter
-                  )
-  alias RailwayIpc.Core.Payload
+  @moduledoc false
 
-  def publish(channel, exchange, message) do
-    @stream_adapter.publish(
-      channel,
-      exchange,
-      prepare_message(message)
-    )
+  alias RailwayIpc.Payload
+
+  @spec publish(adapter :: module(), protobuf_struct :: map(), opts :: Keyword.t()) ::
+          :ok | {:error, error :: binary()}
+  def publish(adapter, message, opts \\ []) do
+    do_publish(message, opts, &adapter.publish/3)
   end
 
-  def reply(channel, queue, reply) do
-    @stream_adapter.reply(
-      channel,
-      queue,
-      prepare_message(reply)
-    )
+  @spec publish_sync(adapter :: module(), protobuf_struct :: map(), opts :: Keyword.t()) ::
+          :ok | {:ok, response :: any()} | {:error, error :: binary()}
+  def publish_sync(adapter, message, opts \\ []) do
+    do_publish(message, opts, &adapter.publish_sync/3)
   end
 
-  def prepare_message(message) do
-    {:ok, message} =
-      message
-      |> Map.put(:uuid, UUID.uuid1())
-      |> Payload.encode()
+  defp do_publish(message, opts, func) do
+    message = Payload.prepare(message)
+    metadata = Payload.metadata(message)
 
-    message
+    {:ok, encoded_message} = Payload.encode(message)
+    func.(encoded_message, metadata, opts)
   end
 
   defmacro __using__(opts) do
-    quote do
-      @stream_adapter Application.get_env(
-                        :railway_ipc,
-                        :stream_adapter,
-                        RailwayIpc.RabbitMQ.RabbitMQAdapter
-                      )
+    quote bind_quoted: [opts: opts] do
+      broker = Keyword.fetch!(opts, :broker)
 
-      alias RailwayIpc.Core.Payload
+      @opts opts
+      @adapter broker.__adapter__()
+      @otp_app broker.__otp_app__()
 
-      def publish(message) do
-        channel = RailwayIpc.Connection.publisher_channel()
-        exchange = unquote(Keyword.get(opts, :exchange))
-        RailwayIpc.Publisher.publish(channel, exchange, message)
+      def publish(message, opts \\ []) do
+        RailwayIpc.Publisher.publish(@adapter, message, adapter_opts(opts))
       end
 
-      def publish_sync(message, timeout \\ :timer.seconds(5)) do
-        channel = RailwayIpc.Connection.publisher_channel()
+      def publish_sync(message, opts \\ []) do
+        RailwayIpc.Publisher.publish_sync(@adapter, message, adapter_opts(opts))
+      end
 
-        {:ok, %{queue: callback_queue}} =
-          @stream_adapter.create_queue(
-            channel,
-            "anonymous",
-            exclusive: true,
-            auto_delete: true
-          )
-
-        @stream_adapter.subscribe(channel, callback_queue)
-
-        message
-        |> Map.put(:reply_to, callback_queue)
-        |> publish
-
-        receive do
-          {:basic_deliver, payload, _meta} = msg ->
-            {:ok, decoded_message} = Payload.decode(payload)
-
-            if decoded_message.correlation_id == message.correlation_id do
-              {:ok, decoded_message}
-            end
-        after
-          timeout ->
-            {:error, :timeout}
-        end
+      defp adapter_opts(opts) do
+        @opts
+        |> Keyword.merge(opts)
+        |> Keyword.put(:otp_app, @otp_app)
       end
     end
   end

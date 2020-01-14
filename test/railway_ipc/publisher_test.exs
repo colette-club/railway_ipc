@@ -1,62 +1,135 @@
 defmodule RailwayIpc.PublisherTest do
   use ExUnit.Case
-  import Mox
-  setup :set_mox_global
-  setup :verify_on_exit!
 
-  alias RailwayIpc.StreamMock
-  alias RailwayIpc.Connection
-  alias RailwayIpc.Core.Payload
-  alias RailwayIpc.Test.BatchEventsPublisher
+  alias RailwayIpc.Payload
 
-  setup do
-    StreamMock
-    |> stub(
-      :connect,
-      fn ->
-        {:ok, %{pid: self()}}
-      end
-    )
-    |> stub(
-      :get_channel,
-      fn _conn ->
-        {:ok, %{pid: self()}}
-      end
-    )
-    |> stub(
-      :get_channel_from_cache,
-      fn _connection, _channels, _consumer_module ->
-        {
-          :ok,
-          %{
-            BatchEventsPublisher => %{
-              pid: self()
-            }
-          },
-          %{pid: self()}
-        }
-      end
-    )
-
-    Connection.start_link(name: Connection)
-
-    StreamMock
-    |> stub(
-      :publish,
-      fn _channel, _exchange, message ->
-        {:ok, _decoded} = Payload.decode(message)
-      end
-    )
-
-    :ok
+  defp normalize(config) do
+    config |> Enum.sort()
   end
 
-  test "adds uuid to published message" do
-    command = Events.AThingWasDone.new(user_uuid: "abcabc")
+  describe "RailwayIpc.Publisher.publish/3" do
+    test "calls the adapter with a binary payload and the opts" do
+      message =
+        Events.AThingWasDone.new(
+          user_uuid: "abcabc",
+          uuid: UUID.uuid4(),
+          correlation_id: UUID.uuid4()
+        )
 
-    with message <- RailwayIpc.Publisher.prepare_message(command),
-         {:ok, decoded} <- Payload.decode(message) do
-      assert {:ok, _} = UUID.info(decoded.uuid)
+      parent = self()
+
+      assert :ok =
+               RailwayIpc.Publisher.publish(RailwayIpc.TestAdapter, message,
+                 parent: parent,
+                 foo: :bar
+               )
+
+      {:ok, expected_payload} =
+        message
+        |> Payload.prepare()
+        |> Payload.encode()
+
+      assert is_binary(expected_payload)
+
+      expected_metadata =
+        message
+        |> Payload.prepare()
+        |> Payload.metadata()
+
+      assert is_map(expected_metadata)
+
+      assert_receive {RailwayIpc.TestAdapter, :publish, ^expected_payload, ^expected_metadata,
+                      opts}
+
+      assert [foo: :bar, parent: ^parent] = normalize(opts)
+    end
+  end
+
+  describe "RailwayIpc.Publisher.publish_sync/3" do
+    test "calls the adapter with a binary payload and the opts" do
+      message =
+        Events.AThingWasDone.new(
+          user_uuid: "abcabc",
+          uuid: UUID.uuid4(),
+          correlation_id: UUID.uuid4()
+        )
+
+      parent = self()
+
+      assert {:ok, %{publish_sync_response: :bar}} =
+               RailwayIpc.Publisher.publish_sync(RailwayIpc.TestAdapter, message,
+                 parent: parent,
+                 foo: :bar
+               )
+
+      {:ok, expected_payload} =
+        message
+        |> Payload.prepare()
+        |> Payload.encode()
+
+      assert is_binary(expected_payload)
+
+      expected_metadata =
+        message
+        |> Payload.prepare()
+        |> Payload.metadata()
+
+      assert is_map(expected_metadata)
+
+      assert_receive {RailwayIpc.TestAdapter, :publish_sync, ^expected_payload,
+                      ^expected_metadata, opts}
+
+      assert [foo: :bar, parent: ^parent] = normalize(opts)
+    end
+  end
+
+  describe "publish/2" do
+    test "calls RailwayIpc.Publisher.publish/3 with the broker options" do
+      message =
+        Events.AThingWasDone.new(
+          user_uuid: "abcabc",
+          uuid: UUID.uuid4(),
+          correlation_id: UUID.uuid4()
+        )
+
+      parent = self()
+
+      assert :ok = RailwayIpc.TestPublisher.publish(message, parent: parent, foo: :bar)
+
+      assert_receive {RailwayIpc.TestAdapter, :publish, payload, metadata, opts}
+
+      assert is_binary(payload)
+      assert is_map(metadata)
+
+      assert [broker: RailwayIpc.TestBroker, foo: :bar, otp_app: :railway_ipc, parent: ^parent] =
+               normalize(opts)
+
+      assert RailwayIpc.TestBroker.__adapter__ == RailwayIpc.TestAdapter
+    end
+  end
+
+  describe "publish_sync/2" do
+    test "calls RailwayIpc.Publisher.publish_sync/3 with the broker options" do
+      message =
+        Events.AThingWasDone.new(
+          user_uuid: "abcabc",
+          uuid: UUID.uuid4(),
+          correlation_id: UUID.uuid4()
+        )
+
+      parent = self()
+
+      assert {:ok, %{publish_sync_response: :bar}} = RailwayIpc.TestPublisher.publish_sync(message, parent: parent, foo: :bar)
+
+      assert_receive {RailwayIpc.TestAdapter, :publish_sync, payload, metadata, opts}
+
+      assert is_binary(payload)
+      assert is_map(metadata)
+
+      assert [broker: RailwayIpc.TestBroker, foo: :bar, otp_app: :railway_ipc, parent: ^parent] =
+               normalize(opts)
+
+      assert RailwayIpc.TestBroker.__adapter__ == RailwayIpc.TestAdapter
     end
   end
 end
