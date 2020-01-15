@@ -10,7 +10,7 @@ defmodule RailwayIpc.Publisher do
   end
 
   @spec publish_sync(adapter :: module(), protobuf_struct :: map(), opts :: Keyword.t()) ::
-          :ok | {:ok, response :: any()} | {:error, error :: binary()}
+          {:ok, response :: any()} | {:error, error :: binary()}
   def publish_sync(adapter, message, opts \\ []) do
     do_publish(message, opts, &adapter.publish_sync/3)
   end
