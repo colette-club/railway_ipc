@@ -23,7 +23,7 @@ defmodule RailwayIpc.MixProject do
   defp deps do
     [
       {:amqp, "~> 1.4"},
-      {:protobuf, "~> 0.5.3"},
+      {:protobuf, "~> 0.7.1"},
       {:google_protos, "~> 0.1"},
       {:jason, "~> 1.1"},
       {:elixir_uuid, "~> 1.2"},
