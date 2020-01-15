@@ -15,4 +15,3 @@ message FailedToDoAThing {
   string uuid = 3;
   map<string, string> context = 4;
 }
-
