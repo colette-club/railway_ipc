@@ -52,6 +52,22 @@ defmodule RailwayIpc.RabbitMQTest do
     assert_receive {RailwayIpc.RabbitMQ.TestConsumer, Events.AThingWasDone, ^correlation_id}
   end
 
+  test "publishes a message on an inexistent exchange" do
+    pid = self()
+    correlation_id = UUID.uuid4()
+
+    message =
+      Events.AThingWasDone.new(
+        user_uuid: UUID.uuid4(),
+        correlation_id: correlation_id,
+        uuid: UUID.uuid4(),
+        context: %{"parent" => serialize(pid)}
+      )
+
+    assert :ok = TestPublisher.publish(message, exchange: "unknown", routing_key: "unknown:messages")
+    assert :ok = TestPublisher.publish(message, exchange: "unknown", routing_key: "unknown:messages", mandatory: true)
+  end
+
   test "publishes a message on a topic exchange" do
     pid = self()
     correlation_id = UUID.uuid4()
