@@ -26,7 +26,8 @@ defmodule RailwayIpc.Adapters.RabbitMQ do
 
   @impl true
   @spec consumer_adapter() :: module()
-  def consumer_adapter, do: Application.get_env(:railway_ipc, :rabbit_mq_consumer_impl, RabbitMQ.Consumer)
+  def consumer_adapter,
+    do: Application.get_env(:railway_ipc, :rabbit_mq_consumer_impl, RabbitMQ.Consumer)
 
   @impl true
   @spec publish(payload :: binary(), metadata :: map(), opts :: Keyword.t()) ::

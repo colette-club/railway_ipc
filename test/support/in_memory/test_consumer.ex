@@ -1,8 +1,9 @@
-defmodule RailwayIpc.RabbitMQ.TestConsumer do
+defmodule RailwayIpc.InMemory.TestConsumer do
   @moduledoc false
 
   require Logger
-  use RailwayIpc.Consumer, broker: RailwayIpc.RabbitMQ.TestBroker, queue_name: "test:messages"
+
+  use RailwayIpc.Consumer, broker: RailwayIpc.InMemory.TestBroker
 
   alias RailwayIpc.TestHelpers
 

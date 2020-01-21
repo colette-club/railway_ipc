@@ -104,7 +104,7 @@ defmodule RailwayIpc.PublisherTest do
       assert [broker: RailwayIpc.TestBroker, foo: :bar, otp_app: :railway_ipc, parent: ^parent] =
                normalize(opts)
 
-      assert RailwayIpc.TestBroker.__adapter__ == RailwayIpc.TestAdapter
+      assert RailwayIpc.TestBroker.__adapter__() == RailwayIpc.TestAdapter
     end
   end
 
@@ -119,7 +119,8 @@ defmodule RailwayIpc.PublisherTest do
 
       parent = self()
 
-      assert {:ok, %{publish_sync_response: :bar}} = RailwayIpc.TestPublisher.publish_sync(message, parent: parent, foo: :bar)
+      assert {:ok, %{publish_sync_response: :bar}} =
+               RailwayIpc.TestPublisher.publish_sync(message, parent: parent, foo: :bar)
 
       assert_receive {RailwayIpc.TestAdapter, :publish_sync, payload, metadata, opts}
 
@@ -129,7 +130,7 @@ defmodule RailwayIpc.PublisherTest do
       assert [broker: RailwayIpc.TestBroker, foo: :bar, otp_app: :railway_ipc, parent: ^parent] =
                normalize(opts)
 
-      assert RailwayIpc.TestBroker.__adapter__ == RailwayIpc.TestAdapter
+      assert RailwayIpc.TestBroker.__adapter__() == RailwayIpc.TestAdapter
     end
   end
 end

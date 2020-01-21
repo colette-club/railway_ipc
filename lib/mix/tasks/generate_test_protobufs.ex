@@ -14,8 +14,9 @@ defmodule Mix.Tasks.GenerateTestProtobufs do
     |> case do
       [] ->
         Logger.info("Protobuf messages generated successfully")
+
       error ->
-        Logger.error("Protobuf generation failed with error: #{inspect error}")
+        Logger.error("Protobuf generation failed with error: #{inspect(error)}")
     end
   end
 end
