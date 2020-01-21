@@ -26,13 +26,14 @@ defmodule RailwayIpc.Adapters.RabbitMQ.Consumer do
     queue_name = Keyword.fetch!(opts, :queue_name)
     module = Keyword.fetch!(opts, :module)
     adapter = Keyword.get(opts, :adapter, RabbitMQ.current_impl())
+    queue_initializer = Keyword.get(opts, :queue_initializer, RabbitMQ.QueueInitializer)
     name = Keyword.fetch!(opts, :name)
     name = String.to_atom("#{name}.RabbitMQ")
 
     pool_id = RabbitMQ.Connection.pool_name(:consumers, otp_app)
 
     [
-      RabbitMQ.QueueInitializer.child_spec(opts),
+      queue_initializer.child_spec(opts),
       %{
         id: name,
         start:

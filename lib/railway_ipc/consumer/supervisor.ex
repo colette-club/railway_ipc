@@ -5,7 +5,10 @@ defmodule RailwayIpc.Consumer.Supervisor do
   Starts the broker supervisor.
   """
   def start_link(consumer, otp_app, adapter, use_opts, opts) do
-    sup_opts = if name = Keyword.get(opts, :name, consumer), do: [name: name], else: []
+    sup_opts =
+      if name = Keyword.get(opts, :name, consumer),
+        do: [name: String.to_atom("#{name}.Supervisor")],
+        else: []
 
     Supervisor.start_link(
       __MODULE__,

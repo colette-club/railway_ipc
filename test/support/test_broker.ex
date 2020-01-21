@@ -6,14 +6,16 @@ defmodule RailwayIpc.TestConsumerAdapter do
   def child_spec(opts) do
     opts[:parent] && send(opts[:parent], {__MODULE__, :child_spec, opts})
 
-    [%{
-      id: __MODULE__,
-      start:
+    [
+      %{
+        id: __MODULE__,
+        start:
           {__MODULE__, :start_link,
            [
              opts
            ]}
-    }]
+      }
+    ]
   end
 
   def start_link(opts) do

@@ -11,7 +11,9 @@ defmodule RailwayIpc.PayloadTest do
     test "properly encodes a protobuf payload" do
       command = Events.AThingWasDone.new(uuid: "123123")
       {:ok, encoded} = Payload.encode(command)
-      assert encoded == "{\"encoded_message\":\"GgYxMjMxMjM=\",\"type\":\"Events::AThingWasDone\"}"
+
+      assert encoded ==
+               "{\"encoded_message\":\"GgYxMjMxMjM=\",\"type\":\"Events::AThingWasDone\"}"
     end
 
     test "raises an ArgumentError with a map payload" do
@@ -102,7 +104,10 @@ defmodule RailwayIpc.PayloadTest do
       assert "" = Map.get(command, :correlation_id)
 
       prepared_command = Payload.prepare(command)
-      {_, old_values_from_prepared_command} = Map.split(prepared_command, [:uuid, :correlation_id])
+
+      {_, old_values_from_prepared_command} =
+        Map.split(prepared_command, [:uuid, :correlation_id])
+
       {_, old_values_from_command} = Map.split(command, [:uuid, :correlation_id])
 
       assert old_values_from_command == old_values_from_prepared_command
