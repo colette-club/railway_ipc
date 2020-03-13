@@ -4,7 +4,6 @@ defmodule RailwayIpc.Adapters.InMemory do
   @behaviour RailwayIpc.Adapters.Impl
 
   alias __MODULE__
-  alias RailwayIpc.Payload
 
   @impl true
   @spec child_spec(config :: Keyword.t()) ::
